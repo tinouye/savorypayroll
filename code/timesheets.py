@@ -77,6 +77,7 @@ def process_json(rows_json):
                 
 
 def aggregate_data(end_date, rows_json):
+    # Key: Employee name Value: HoursHolder object
     employee_hours_dict = {}
     for row in rows_json:
         curr_employee = row["Employee"]
@@ -85,35 +86,34 @@ def aggregate_data(end_date, rows_json):
         
         employee_hours_dict[curr_employee].add_row(row)
 
+    # Calculate overtime and 2-week totals
+    for employee in employee_hours_dict:
+        employee_hours_dict[employee].post_processing()
+
     return employee_hours_dict
 
 
-def output_csv(end_date, all_hours):
-    # Hack to get headers from dictionary
-    for employee in all_hours:
-        fieldnames = list(all_hours[employee].all_rows[0].keys())
-        break
+def output_csv(end_date, hours_holders):
 
+    fieldnames = HoursHolder.row_headers
 
     try:
         with open (f'output/payroll_ending_{end_date.isoformat()}.csv', mode='x', newline='') as output_csv:
             csv_dictwriter = csv.DictWriter(output_csv, fieldnames=fieldnames)
             csv_writer = csv.writer(output_csv)
 
-            for employee in all_hours:
+            for employee in hours_holders:
+
                 csv_dictwriter.writeheader()
-                for row in all_hours[employee].all_rows:
+                for row in hours_holders[employee].all_rows:
                     csv_dictwriter.writerow(row)
 
-                total_worked = all_hours[employee].all_hours["week1"]["worked"] + all_hours[employee].all_hours["week2"]["worked"]
-                total_break = all_hours[employee].all_hours["week1"]["break"] or all_hours[employee].all_hours["week2"]["break"]
-                total_leave = all_hours[employee].all_hours["week1"]["leave"] + all_hours[employee].all_hours["week2"]["leave"]
-                total_sick = all_hours[employee].all_hours["week1"]["sick"] + all_hours[employee].all_hours["week2"]["sick"]
+                employee_hours = hours_holders[employee].all_hours
 
-                csv_writer.writerow(["","Worked Hours", "Break Hours", "Leave Hours", "Sick Hours"])
-                csv_writer.writerow(["Week 1", all_hours[employee].all_hours["week1"]["worked"], all_hours[employee].all_hours["week1"]["break"], all_hours[employee].all_hours["week1"]["leave"], all_hours[employee].all_hours["week1"]["sick"]])
-                csv_writer.writerow(["Week 2", all_hours[employee].all_hours["week2"]["worked"], all_hours[employee].all_hours["week2"]["break"], all_hours[employee].all_hours["week2"]["leave"], all_hours[employee].all_hours["week2"]["sick"]])
-                csv_writer.writerow(["Total", total_worked, total_break, total_leave, total_sick])
+                csv_writer.writerow(["","Worked Hours", "Overtime", "Break Hours", "Leave Hours", "Sick Hours"])
+                csv_writer.writerow(["Week 1", employee_hours["week1"]["worked"], employee_hours["week1"]["overtime"], employee_hours["week1"]["break"], employee_hours["week1"]["leave"], employee_hours["week1"]["sick"]])
+                csv_writer.writerow(["Week 2", employee_hours["week2"]["worked"], employee_hours["week2"]["overtime"], employee_hours["week2"]["break"], employee_hours["week2"]["leave"], employee_hours["week2"]["sick"]])
+                csv_writer.writerow(["Total", employee_hours["total"]["worked"], employee_hours["total"]["overtime"], employee_hours["total"]["break"], employee_hours["total"]["leave"], employee_hours["total"]["sick"]])
                 csv_writer.writerow(["\n"])
     
     except FileExistsError:

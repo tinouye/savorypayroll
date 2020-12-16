@@ -14,12 +14,14 @@ if __name__ == "__main__":
 
     # Bypass user input
     if debug_mode:
-        end_date = dt.date.fromisoformat("2020-09-18")
+        end_date = dt.date.fromisoformat("2020-12-10")
     
     else:
         # Loop continues while end_date has no value
         while not end_date:
             text_input = input("Enter payroll end date (YYYY-MM-DD): ")
+            if text_input == "quit":
+                quit()
             try:
                 end_date = dt.date.fromisoformat(text_input)
                 # Loop y/n question while answer isn't y nor n

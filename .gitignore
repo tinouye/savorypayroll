@@ -1,5 +1,4 @@
 output/
 timesheets
 code/credentials.txt
-timesheet-master.csv
-test.csv
+run.sh
