@@ -104,9 +104,16 @@ def output_csv(end_date, all_hours):
                 csv_dictwriter.writeheader()
                 for row in all_hours[employee].all_rows:
                     csv_dictwriter.writerow(row)
+
+                total_worked = all_hours[employee].all_hours["week1"]["worked"] + all_hours[employee].all_hours["week2"]["worked"]
+                total_break = all_hours[employee].all_hours["week1"]["break"] or all_hours[employee].all_hours["week2"]["break"]
+                total_leave = all_hours[employee].all_hours["week1"]["leave"] + all_hours[employee].all_hours["week2"]["leave"]
+                total_sick = all_hours[employee].all_hours["week1"]["sick"] + all_hours[employee].all_hours["week2"]["sick"]
+
                 csv_writer.writerow(["","Worked Hours", "Break Hours", "Leave Hours", "Sick Hours"])
                 csv_writer.writerow(["Week 1", all_hours[employee].all_hours["week1"]["worked"], all_hours[employee].all_hours["week1"]["break"], all_hours[employee].all_hours["week1"]["leave"], all_hours[employee].all_hours["week1"]["sick"]])
                 csv_writer.writerow(["Week 2", all_hours[employee].all_hours["week2"]["worked"], all_hours[employee].all_hours["week2"]["break"], all_hours[employee].all_hours["week2"]["leave"], all_hours[employee].all_hours["week2"]["sick"]])
+                csv_writer.writerow(["Total", total_worked, total_break, total_leave, total_sick])
                 csv_writer.writerow(["\n"])
     
     except FileExistsError:

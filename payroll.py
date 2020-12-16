@@ -10,7 +10,7 @@ from mastertimesheet import MasterTimesheet
 
 if __name__ == "__main__":
     end_date = None
-    debug_mode = True
+    debug_mode = False
 
     # Bypass user input
     if debug_mode:
@@ -19,7 +19,7 @@ if __name__ == "__main__":
     else:
         # Loop continues while end_date has no value
         while not end_date:
-            text_input = input("Enter payroll end date: ")
+            text_input = input("Enter payroll end date (YYYY-MM-DD): ")
             try:
                 end_date = dt.date.fromisoformat(text_input)
                 # Loop y/n question while answer isn't y nor n
